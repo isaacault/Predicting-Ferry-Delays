@@ -113,4 +113,4 @@ if __name__ == "__main__":
     plt.scatter(delayed['beginning'], delayed['destination'], s=10, label='Delayed')
     plt.scatter(not_delayed['beginning'], not_delayed['destination'], s=10, label='Not Delayed')
     plt.legend()
-    plt.savefig('/mnt/c/Users/rkane/Pictures/plot.png')
+    plt.savefig('plot.png')
