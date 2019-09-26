@@ -1,18 +1,57 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 # TensorFlow and tf.keras
-import tensorflow as tf
-import keras
+# commented out for now because this is slow
+# import tensorflow as tf
+# import keras
 
 import numpy as np
 import pandas as pd
-from scipy.optimize import fmin_tnc
+from scipy.optimize import fmin_tnc, check_grad, least_squares
 
 from sklearn import metrics
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score 
 
 
+class LR_Model():
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.model = LogisticRegression(solver='liblinear')
+
+    def train(self, X, y):    
+        self.model.fit(X, y.ravel())
+    
+    def accuracy(self, x, actual_classes):
+        predicted_classes = self.model.predict(x)
+        accuracy = accuracy_score(actual_classes.flatten(), predicted_classes)
+        print(accuracy)
+        predicted_probs = self.model.predict_proba(x)
+        predicted_probs = predicted_probs.flatten()
+        print(predicted_probs)
+        return auc(predicted_classes, actual_classes)
+
+# Some utility functions used for computing in the model
+def sigmoid(x):
+    # Activation function used to map any real value between 0 and 1
+    return 1 / (1 + np.exp(-x))
+
+def net_input(theta, x):
+    # Computes the weighted sum of inputs
+    return np.dot(x, theta)
+
+def probability(theta, x):
+    # Returns the probability after passing through sigmoid
+    return sigmoid(net_input(theta, x))
+
+def cost_function(theta, x, y):
+    # Computes the cost function for all the training samples
+    m = x.shape[0]
+    total_cost = -(1 / m) * np.sum(y * np.log(probability(theta, x)) + (1 - y) * np.log(1 - probability(theta, x)))
+    return total_cost
 
 class Model():
+
     def __init__(self, *args, **kwargs):
         return
 
@@ -23,8 +62,13 @@ class Model():
 
     def fit(self, x, y, theta):
         # minimizes cost function
+        # print(check_grad(cost_function, self.gradient, theta, x, y))
+
+        other_weights = least_squares(cost_function, theta.flatten(), args=(x, y))
         opt_weights = fmin_tnc(func=cost_function, x0=theta,
-                            fprime=self.gradient,args=(x, y.flatten()))
+                                fprime=self.gradient, args=(x, y.flatten()))
+        print(opt_weights)
+        print(other_weights)
         self.params = opt_weights[0]
 
     def predict(self, x):
@@ -32,29 +76,9 @@ class Model():
         return probability(theta, x)
 
     def accuracy(self, x, actual_classes):
-        predicted_classes = self.model.predict(x)
+        predicted_classes = self.predict(x)
         predicted_classes = predicted_classes.flatten()
         return auc(predicted_classes, actual_classes)
-
-    # Some utility functions used for computing in the model
-
-    def sigmoid(x):
-        # Activation function used to map any real value between 0 and 1
-        return 1 / (1 + np.exp(-x))
-
-    def net_input(theta, x):
-        # Computes the weighted sum of inputs
-        return np.dot(x, theta)
-
-    def probability(theta, x):
-        # Returns the probability after passing through sigmoid
-        return sigmoid(net_input(theta, x))
-
-    def cost_function(theta, x, y):
-        # Computes the cost function for all the training samples
-        m = x.shape[0]
-        total_cost = -(1 / m) * np.sum(y * np.log(probability(theta, x)) + (1 - y) * np.log(1 - probability(theta, x)))
-        return total_cost
 
 class TF_Model():
     def __init__(self, *args, **kwargs):

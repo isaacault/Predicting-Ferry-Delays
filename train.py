@@ -10,6 +10,6 @@ class Model():
         self.model.fit(X, y.ravel())
     
     def test_accuracy(self, X, y):
-        predicted_classes = self.model.predict(X)
+        predicted_classes = self.model.predict_proba(X)
         accuracy = accuracy_score(y.flatten(), predicted_classes)
         return accuracy
