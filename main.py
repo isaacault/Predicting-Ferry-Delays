@@ -204,3 +204,15 @@ plt.hist(error, bins = 25)
 plt.xlabel("Prediction Error [MPG]")
 _ = plt.ylabel("Count")
 plt.show()
+
+auc = tf.metrics.auc(
+    labels,
+    predictions,
+    weights=None,
+    num_thresholds=200,
+    metrics_collections=None,
+    updates_collections=None,
+    curve='ROC',
+    name=None,
+    summation_method='trapezoidal'
+)
