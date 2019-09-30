@@ -1,9 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 # TensorFlow and tf.keras
-# commented out for now because this is slow
-# import tensorflow as tf
-# import keras
+import tensorflow as tf
+import keras
 
 import numpy as np
 import pandas as pd
@@ -62,13 +61,9 @@ class Model():
 
     def fit(self, x, y, theta):
         # minimizes cost function
-        # print(check_grad(cost_function, self.gradient, theta, x, y))
-
-        other_weights = least_squares(cost_function, theta.flatten(), args=(x, y))
+        print(theta)
         opt_weights = fmin_tnc(func=cost_function, x0=theta,
                                 fprime=self.gradient, args=(x, y.flatten()))
-        print(opt_weights)
-        print(other_weights)
         self.params = opt_weights[0]
 
     def predict(self, x):
@@ -81,16 +76,31 @@ class Model():
         return auc(predicted_classes, actual_classes)
 
 class TF_Model():
-    def __init__(self, *args, **kwargs):
+    def __init__(self, in_size, out_size, *args, **kwargs):
         self.model = keras.Sequential([
-            keras.layers.Dense(8, activation='relu', input_dim=6, kernel_initializer='random_normal'),
+            keras.layers.Dense(8, activation='relu', input_dim=in_size, kernel_initializer='random_normal'),
             # keras.layers.Dense(4, activation=tf.nn.relu),
             keras.layers.Dense(1, activation='sigmoid')
         ])
-        self.model.compile(optimizer='sgd', loss='binary_crossentropy', metrics=['accuracy'])
+
+        metrics = [
+                keras.metrics.Accuracy(name='accuracy'),
+                keras.metrics.TruePositives(name='tp'),
+                keras.metrics.FalsePositives(name='fp'),
+                keras.metrics.TrueNegatives(name='tn'),
+                keras.metrics.FalseNegatives(name='fn'),
+                keras.metrics.Precision(name='precision'),
+                keras.metrics.Recall(name='recall'),
+                keras.metrics.AUC(name='auc')
+            ]
+
+        self.model.compile(
+            optimizer='adam',
+            loss='binary_crossentropy',
+            metrics=metrics)
 
     def train(self, X, y):
-        self.model.fit(X, y, batch_size=10, epochs=3)
+        self.model.fit(X, y, epochs=3)
 
     def accuracy(self, X, actual_classes):
         predicted_classes = self.model.predict(X)

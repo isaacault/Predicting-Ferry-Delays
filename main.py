@@ -35,7 +35,7 @@ def logistic_regression(train_data, test_partition=0):
     model.train(X, y)
     return model
 
-def tf_neural_network(train_data, test_partition=0):
+def tf_neural_network(train_data, out_size=1, test_partition=0):
     # features
     X = train_data.iloc[test_partition:, :-1]
     # target values
@@ -46,44 +46,15 @@ def tf_neural_network(train_data, test_partition=0):
     X = X.to_numpy()
     # y = y[:, np.newaxis]
     y = y.to_numpy()
-    model = TF_Model()
-    print(model.accuracy(X, y))
+    model = TF_Model(in_size=X.shape[1], out_size=out_size)
     model.train(X, y)
     return model
 
 if __name__ == "__main__":
-    test_partition = 10000 # for TEST    
-    data = c.load_data("Data/train.csv", 0)
-    traffic_data = c.load_data("Data/traffic.csv", 0)
-    vancouver_data = c.load_data("Data/vancouver.csv", 0)
-    victoria_data = c.load_data("Data/victoria.csv", 0)
-    train_data = shuffle(data)
-    train_data = c.clean_trips(train_data)
-    train_data = c.clean_date_time(train_data) 
-    train_data = c.clean_status(train_data)
-    train_data = c.clean_vessels(train_data)
-    train_data.to_csv("Data/clean_train.csv")    
-    print(train_data)
-    model = linear_regression(train_data, test_partition)
-    # model = logistic_regression(train_data)
-
-    # TEST
-    # model = linear_regression(train_data, test_partition)
-    X_test = train_data.iloc[:test_partition, :-1]
-    # # target values
-    y_test = train_data.iloc[:test_partition, -1]
-
-    X_test = np.c_[np.ones((X_test.shape[0], 1)), X_test]
-    y_test = y_test[:, np.newaxis]
-    accuracy = model.accuracy(X_test, y_test)
-    print(accuracy)
-
-    # # REAL
-    # model = linear_regression(train_data)
-    # X_test = test_data.iloc[:, 1:]
-    # ids = test_data.iloc[:, 1]
-    # X_test = np.c_[np.ones((X_test.shape[0], 1)), X_test]
-    # predictions = model.predict(X_test)
+    # create model for learning traffic based on timestamp
+    traffic_data = c.load_data("Data/traffic.csv", 0).head(1000)
+    traffic_data = c.clean_traffic_data(traffic_data)
+    print(traffic_data.isnull().values.any())
 
     # tutorial: 
     # https://towardsdatascience.com/building-a-logistic-regression-in-python-301d27367c24

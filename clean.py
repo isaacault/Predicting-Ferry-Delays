@@ -292,3 +292,20 @@ def stitch_weather_types(data, weather_data):
         data[w_type] = (weather == w_type)*1.0
     return data
 
+def clean_traffic_data(data):
+    data.dropna()
+    timestamps = []
+    for index, row in data.iterrows():
+        try:
+            ts = datetime.datetime(year=int(row['Year']),
+                                month=int(row['Month']),
+                                day=int(row['Day']),
+                                hour=int(row['Hour']),
+                                minute=int(row['Minute']), 
+                                second=int(row['Second']))
+        except ValueError as e:
+            continue
+        timestamps.append(ts.timestamp())
+    data = data.drop(columns=['Year', 'Month', 'Day', 'Hour', 'Minute', 'Second'])
+    data.insert(0, 'timestamp', timestamps)
+    return data
