@@ -304,8 +304,13 @@ def clean_traffic_data(data):
                                 minute=int(row['Minute']), 
                                 second=int(row['Second']))
         except ValueError as e:
+            print(e)
+            print(row)
+            data = data.drop(index)
             continue
         timestamps.append(ts.timestamp())
     data = data.drop(columns=['Year', 'Month', 'Day', 'Hour', 'Minute', 'Second'])
+    print(data.shape)
+    print(len(timestamps))
     data.insert(0, 'timestamp', timestamps)
     return data

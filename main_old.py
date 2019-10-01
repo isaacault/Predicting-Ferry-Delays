@@ -48,6 +48,7 @@ def tf_neural_network(train_data, out_size=1, test_partition=0):
     y = y.to_numpy()
     model = TF_Model(in_size=X.shape[1], out_size=out_size)
     model.train(X, y)
+    model.accuracy(X, y)
     return model
 
 if __name__ == "__main__":
@@ -55,7 +56,10 @@ if __name__ == "__main__":
     traffic_data = c.load_data("Data/traffic.csv", 0).head(1000)
     traffic_data = c.clean_traffic_data(traffic_data)
     print(traffic_data.isnull().values.any())
+    traffic_model = tf_neural_network(traffic_data)
+    print(traffic_data)
 
     # tutorial: 
     # https://towardsdatascience.com/building-a-logistic-regression-in-python-301d27367c24
     # https://donaldpinckney.com/books/pytorch/book/ch2-linreg/2018-03-21-multi-variable.html
+
