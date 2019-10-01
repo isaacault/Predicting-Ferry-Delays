@@ -309,8 +309,8 @@ def clean_traffic_data(data):
             data = data.drop(index)
             continue
         timestamps.append(ts.timestamp())
-    data = data.drop(columns=['Year', 'Month', 'Day', 'Hour', 'Minute', 'Second'])
-    print(data.shape)
-    print(len(timestamps))
-    data.insert(0, 'timestamp', timestamps)
+    #data = data.drop(columns=['Year', 'Month', 'Day', 'Hour', 'Minute', 'Second'])
+    #print(data.shape)
+    #print(len(timestamps))
+    #data.insert(0, 'timestamp', timestamps)
     return data

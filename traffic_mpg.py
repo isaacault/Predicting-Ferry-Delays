@@ -15,12 +15,13 @@ import clean
 
 print(tf.__version__)
 
-dataset = clean.load_data("Data/traffic.csv", 0).head(1000)
+dataset = clean.load_data("Data/traffic.csv", 0).head(600000)
 print(dataset.shape)
-dataset = clean.clean_traffic_data(dataset)
-for col in dataset.columns:
-    dataset[col] = dataset[col].astype(int)
-print(dataset.tail())
+#dataset = clean.clean_traffic_data(dataset)
+dataset = dataset.dropna()
+#for col in dataset.columns:
+#    dataset[col] = dataset[col].astype(int)
+print(dataset)
 
 
 train_dataset = dataset.sample(frac=0.8,random_state=0)
@@ -31,14 +32,23 @@ test_dataset = dataset.drop(train_dataset.index)
 train_stats = train_dataset.describe()
 train_stats.pop("Traffic.Ordinal")
 train_stats = train_stats.transpose()
+print(train_stats)
 
 train_labels = train_dataset.pop('Traffic.Ordinal')
 test_labels = test_dataset.pop('Traffic.Ordinal')
+print(train_stats['mean'])
+print(train_stats['std'])
+train_stats['std']['Year'] = 1
+train_stats['std']['Month'] = 1
+train_stats['std']['Day'] = 1
+print(type(train_stats))
 
 def norm(x):
   return (x - train_stats['mean']) / train_stats['std']
+
 normed_train_data = norm(train_dataset)
 normed_test_data = norm(test_dataset)
+print(normed_train_data)
 
 
 def build_model():
@@ -91,6 +101,12 @@ def plot_history(history):
   plt.show()
 
 model = build_model()
+print(model.summary())
+example_batch = normed_train_data[:10]
+print(example_batch)
+print(train_labels[:10])
+example_result = model.predict(example_batch)
+print(example_result)
 
 # The patience parameter is the amount of epochs to check for improvement
 early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10)
