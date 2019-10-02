@@ -12,7 +12,7 @@ from sklearn.preprocessing import Imputer
 # train data: 
 # "Vessel.Name","Scheduled.Departure","Status","Trip","Trip.Duration","Day","Month","Day.of.Month","Year","Full.Date","Delay.Indicator"
 
-def load_data(path, header):
+def load_data(path, header=0):
     marks_df = pd.read_csv(path, header=header)
     return marks_df
 

@@ -17,8 +17,8 @@ import clean
 
 print(tf.__version__)
 traffic_dataset = clean.load_data("Data/traffic.csv", 0)
-vancouver_dataset = clean.load_data("Data/vancouver.csv")
-victoria_dataset = clean.load_data("Data/victoria.csv")
+vancouver_dataset = clean.load_data("Data/vancouver.csv", 0)
+victoria_dataset = clean.load_data("Data/victoria.csv", 0)
 
 if(os.path.isfile("Data/clean_dataset.csv")):
     dataset = clean.load_data("Data/clean_dataset.csv", 0)
@@ -35,13 +35,13 @@ else:
     dataset.to_csv("Data/clean_dataset.csv")
 
 if(os.path.isfile("Data/clean_test.csv")):
-    submission_dataset = clean.load("Data/clean_test.csv")    
+    submission_dataset = clean.load_data("Data/clean_test.csv")    
 else:
-    submission_dataset = clean.load("Data/test.csv")
+    submission_dataset = clean.load_data("Data/test.csv")
     submission_dataset = clean.clean_date_time(submission_dataset)
     submission_dataset = clean.clean_trips(submission_dataset)
     submission_dataset = clean.clean_vessels(submission_dataset)
-    submission_dataset = clean.stitch_traffic(submission_dataset, train_dataset)
+    submission_dataset = clean.stitch_traffic(submission_dataset, traffic_dataset)
     submission_dataset = clean.stitch_weather(submission_dataset, vancouver_dataset, "vancouver")
     submission_dataset = clean.stitch_weather(submission_dataset, victoria_dataset, "victoria")
     dataset.to_csv("Data/clean_test.csv")
@@ -102,6 +102,7 @@ def plot_history(history):
   plt.figure()
   plt.xlabel('Epoch')
   plt.ylabel('Mean Abs Error [Delay.Indicator]')
+
   plt.plot(hist['epoch'], hist['mean_absolute_error'],
            label='Train Error')
   plt.plot(hist['epoch'], hist['val_mean_absolute_error'],
@@ -112,6 +113,7 @@ def plot_history(history):
   plt.figure()
   plt.xlabel('Epoch')
   plt.ylabel('Mean Square Error [$Delay.Indicator^2$]')
+
   plt.plot(hist['epoch'], hist['mean_squared_error'],
            label='Train Error')
   plt.plot(hist['epoch'], hist['val_mean_squared_error'],
@@ -131,4 +133,18 @@ accuracy = metrics.auc(fpr, tpr)
 print(accuracy)
 print(pd.DataFrame({'ID': [submission_ids], 'Delay.Indicator': [submission_predictions]}))
 
+plt.scatter(test_labels, test_predictions)
+plt.xlabel('True Values [Delay_Indicator]')
+plt.ylabel('Predictions [Delay_Indicator]')
+plt.axis('equal')
+plt.axis('square')
+plt.xlim([0,plt.xlim()[1]])
+plt.ylim([0,plt.ylim()[1]])
+_ = plt.plot([-100, 100], [-100, 100])
+plt.show()
 
+error = test_predictions - test_labels
+plt.hist(error, bins = 25)
+plt.xlabel("Prediction Error [MPG]")
+_ = plt.ylabel("Count")
+plt.show()
