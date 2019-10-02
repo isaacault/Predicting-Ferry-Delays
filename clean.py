@@ -17,41 +17,41 @@ def load_data(path, header):
     return marks_df
 
 def clean_trips(data, train=True):
-    places = dict()
-    places_index = 0
-    froms = []
-    dests = []
-    for trip in data['Trip']:
-        locs = trip.split(" to ")
-        beg = locs[0]
-        dest = locs[1]
-        if beg not in places:
-            places[beg] = places_index
-            places_index += 1
-        if dest not in places:
-            places[dest] = places_index
-            places_index += 1
+    # places = dict()
+    # places_index = 0
+    # froms = []
+    # dests = []
+    # for trip in data['Trip']:
+    #     locs = trip.split(" to ")
+    #     beg = locs[0]
+    #     dest = locs[1]
+    #     if beg not in places:
+    #         places[beg] = places_index
+    #         places_index += 1
+    #     if dest not in places:
+    #         places[dest] = places_index
+    #         places_index += 1
 
-        froms.append(places[beg])
-        dests.append(places[dest])
+    #     froms.append(places[beg])
+    #     dests.append(places[dest])
     
-    data.insert(1, 'beginning', froms)
-    data.insert(1, 'destination', dests)
-    data = data.drop(columns=['Trip'])
-    if train:
-        data = data.drop(columns=['Trip.Duration'])
+    # data.insert(1, 'beginning', froms)
+    # data.insert(1, 'destination', dests)
+    # data = data.drop(columns=['Trip'])
+    # if train:
+    #     data = data.drop(columns=['Trip.Duration'])
 
-    # trip = data.pop('Trip')
-    # data['Tsawwassen to Swartz Bay'] = (trip == 'Tsawwassen to Swartz Bay')*1.0
-    # data['Tsawwassen to Duke Point'] = (trip == 'Tsawwassen to Duke Point')*1.0
-    # data['Swartz Bay to Fulford Harbour (Saltspring Is.)'] = (trip == 'Swartz Bay to Fulford Harbour (Saltspring Is.)')*1.0
-    # data['Swartz Bay to Tsawwassen'] = (trip == 'Swartz Bay to Tsawwassen')*1.0
-    # data['Duke Point to Tsawwassen'] = (trip == 'Duke Point to Tsawwassen')*1.0
-    # data['Departure Bay to Horseshoe Bay'] = (trip == 'Departure Bay to Horseshoe Bay')*1.0
-    # data['Horseshoe Bay to Snug Cove (Bowen Is.)'] = (trip == 'Horseshoe Bay to Snug Cove (Bowen Is.)')*1.0
-    # data['Horseshoe Bay to Departure Bay'] = (trip == 'Horseshoe Bay to Departure Bay')*1.0
-    # data['Horseshoe Bay to Langdale'] = (trip == 'Horseshoe Bay to Langdale')*1.0
-    # data['Langdale to Horseshoe Bay'] = (trip == 'Langdale to Horseshoe Bay')*1.0
+    trip = data.pop('Trip')
+    data['Tsawwassen to Swartz Bay'] = (trip == 'Tsawwassen to Swartz Bay')*1.0
+    data['Tsawwassen to Duke Point'] = (trip == 'Tsawwassen to Duke Point')*1.0
+    data['Swartz Bay to Fulford Harbour (Saltspring Is.)'] = (trip == 'Swartz Bay to Fulford Harbour (Saltspring Is.)')*1.0
+    data['Swartz Bay to Tsawwassen'] = (trip == 'Swartz Bay to Tsawwassen')*1.0
+    data['Duke Point to Tsawwassen'] = (trip == 'Duke Point to Tsawwassen')*1.0
+    data['Departure Bay to Horseshoe Bay'] = (trip == 'Departure Bay to Horseshoe Bay')*1.0
+    data['Horseshoe Bay to Snug Cove (Bowen Is.)'] = (trip == 'Horseshoe Bay to Snug Cove (Bowen Is.)')*1.0
+    data['Horseshoe Bay to Departure Bay'] = (trip == 'Horseshoe Bay to Departure Bay')*1.0
+    data['Horseshoe Bay to Langdale'] = (trip == 'Horseshoe Bay to Langdale')*1.0
+    data['Langdale to Horseshoe Bay'] = (trip == 'Langdale to Horseshoe Bay')*1.0
     return data
 
 def clean_date_time(data):
@@ -95,37 +95,37 @@ def clean_status(data):
     return data
 
 def clean_vessels(data):
-    vessel_names = dict()
-    vessel_index = 0
-    vessels = []
-    for vessel in data['Vessel.Name']:
-        if vessel not in vessel_names:
-            vessel_names[vessel] = vessel_index
-            vessel_index += 1
-        vessels.append(vessel_names[vessel])
+    # vessel_names = dict()
+    # vessel_index = 0
+    # vessels = []
+    # for vessel in data['Vessel.Name']:
+    #     if vessel not in vessel_names:
+    #         vessel_names[vessel] = vessel_index
+    #         vessel_index += 1
+    #     vessels.append(vessel_names[vessel])
 
-    data = data.drop(columns=['Vessel.Name'])
-    data.insert(1, 'Vessel', vessels)
-    return data
-    # vessel_name = data.pop('Vessel.Name')
-    # data['Spirit of British Columbia'] = (vessel_name == 'Spirit of British Columbia')*1.0
-    # data['Queen of New Westminster'] = (vessel_name == 'Queen of New Westminster')*1.0
-    # data['Spirit of Vancouver Island'] = (vessel_name == 'Spirit of Vancouver Island')*1.0
-    # data['Coastal Celebration'] = (vessel_name == 'Coastal Celebration')*1.0
-    # data['Queen of Alberni'] = (vessel_name == 'Queen of Alberni')*1.0
-    # data['Coastal Inspiration'] = (vessel_name == 'Coastal Inspiration')*1.0
-    # data['Skeena Queen'] = (vessel_name == 'Skeena Queen')*1.0
-    # data['Coastal Renaissance'] = (vessel_name == 'Coastal Renaissance')*1.0
-    # data['Queen of Oak Bay'] = (vessel_name == 'Queen of Oak Bay')*1.0
-    # data['Queen of Cowichan'] = (vessel_name == 'Queen of Cowichan')*1.0
-    # data['Queen of Capilano'] = (vessel_name == 'Queen of Capilano')*1.0
-    # data['Queen of Surrey'] = (vessel_name == 'Queen of Surrey')*1.0
-    # data['Queen of Coquitlam'] = (vessel_name == 'Queen of Coquitlam')*1.0
-    # data['Bowen Queen'] = (vessel_name == 'Bowen Queen')*1.0
-    # data['Queen of Cumberland'] = (vessel_name == 'Queen of Cumberland')*1.0
-    # data['Island Sky'] = (vessel_name == 'Island Sky')*1.0
-    # data['Mayne Queen'] = (vessel_name == 'Mayne Queen')*1.0
+    # data = data.drop(columns=['Vessel.Name'])
+    # data.insert(1, 'Vessel', vessels)
     # return data
+    vessel_name = data.pop('Vessel.Name')
+    data['Spirit of British Columbia'] = (vessel_name == 'Spirit of British Columbia')*1.0
+    data['Queen of New Westminster'] = (vessel_name == 'Queen of New Westminster')*1.0
+    data['Spirit of Vancouver Island'] = (vessel_name == 'Spirit of Vancouver Island')*1.0
+    data['Coastal Celebration'] = (vessel_name == 'Coastal Celebration')*1.0
+    data['Queen of Alberni'] = (vessel_name == 'Queen of Alberni')*1.0
+    data['Coastal Inspiration'] = (vessel_name == 'Coastal Inspiration')*1.0
+    data['Skeena Queen'] = (vessel_name == 'Skeena Queen')*1.0
+    data['Coastal Renaissance'] = (vessel_name == 'Coastal Renaissance')*1.0
+    data['Queen of Oak Bay'] = (vessel_name == 'Queen of Oak Bay')*1.0
+    data['Queen of Cowichan'] = (vessel_name == 'Queen of Cowichan')*1.0
+    data['Queen of Capilano'] = (vessel_name == 'Queen of Capilano')*1.0
+    data['Queen of Surrey'] = (vessel_name == 'Queen of Surrey')*1.0
+    data['Queen of Coquitlam'] = (vessel_name == 'Queen of Coquitlam')*1.0
+    data['Bowen Queen'] = (vessel_name == 'Bowen Queen')*1.0
+    data['Queen of Cumberland'] = (vessel_name == 'Queen of Cumberland')*1.0
+    data['Island Sky'] = (vessel_name == 'Island Sky')*1.0
+    data['Mayne Queen'] = (vessel_name == 'Mayne Queen')*1.0
+    return data
 
 def merge_traffic(data, traffic_data):
     # "Year","Month","Day","Hour","Minute","Second","Traffic.Ordinal"
