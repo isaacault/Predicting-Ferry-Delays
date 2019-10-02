@@ -10,8 +10,10 @@ from tensorflow.keras import layers
 import keras.backend as K
 import load_data
 from collections import OrderedDict
+from sklearn import metrics
 
-EPOCHS = 15
+EPOCHS = 5
+TEST_LOCAL = False
 
 def auc(y_true, y_pred):
     auc = tf.metrics.auc(y_true, y_pred)[1]
@@ -21,7 +23,7 @@ def auc(y_true, y_pred):
 def build_model():
   model = keras.Sequential([
     layers.Dense(64, activation='relu', input_shape=[len(train_data.keys())]),
-    layers.Dense(64, activation='relu'),
+    layers.Dense(32, activation='relu'),
     layers.Dense(1, activation='sigmoid')
   ])
 
@@ -36,13 +38,18 @@ def norm(x):
     return (x - train_stats['mean']) / train_stats['std']
 
 
-
 train_data, test_data = load_data.get_data()
 train_data = train_data.sample(frac=1)
+if TEST_LOCAL:
+  dataset = train_data.copy()
+  train_data = dataset.sample(frac=0.8)
+  test_data = dataset.drop(train_data.index)
+  test_labels = test_data.pop('Delay.Indicator')
 train_labels = train_data.pop('Delay.Indicator')
 train_stats = train_data.describe()
 train_stats = train_stats.transpose()
-submission_id = test_data.pop('ID')
+if not TEST_LOCAL:
+  submission_id  = test_data.pop('ID')
 
 model = build_model()
 
@@ -51,24 +58,26 @@ normed_test_data = norm(test_data)
 
 early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10)
 
+validation = 0.2 if TEST_LOCAL else 0
+
 history = model.fit(
   normed_train_data, train_labels,
-  epochs=EPOCHS, verbose=1)
+  epochs=EPOCHS, validation_split=validation, verbose=1)
 
 test_predictions = model.predict(normed_test_data).flatten()
 
-#test_predictions['ID'] = test_predictions.index
+if TEST_LOCAL:
+  fpr, tpr, thresholds = metrics.roc_curve(test_labels, test_predictions, pos_label=1)
+  accuracy = metrics.auc(fpr, tpr)
+  print(accuracy)
 
-print(test_predictions)
-
-#submission_data = pd.DataFrame({'ID': submission_id, 'Delay.Inidcator':test_predictions})
-submission_data = pd.DataFrame(
-  OrderedDict(
-    {
-      'ID' : pd.Series(submission_id),
-      'Delay.Indicator' : pd.Series(test_predictions)
-    }
+if not TEST_LOCAL:
+  submission_data = pd.DataFrame(
+    OrderedDict(
+      {
+        'ID' : pd.Series(submission_id),
+        'Delay.Indicator' : pd.Series(test_predictions)
+      }
+    )
   )
-)
-print(submission_data)
-submission_data.to_csv('submission.csv', index=False)
+  submission_data.to_csv('submission.csv', index=False)
