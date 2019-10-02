@@ -44,7 +44,7 @@ else:
     submission_dataset = clean.stitch_traffic(submission_dataset, traffic_dataset)
     submission_dataset = clean.stitch_weather(submission_dataset, vancouver_dataset, "vancouver")
     submission_dataset = clean.stitch_weather(submission_dataset, victoria_dataset, "victoria")
-    dataset.to_csv("Data/clean_test.csv")
+    submission_dataset.to_csv("Data/clean_test.csv")
 
 
 dataset = dataset.dropna()
@@ -72,7 +72,7 @@ def norm(x):
   return (x - train_stats['mean']) / train_stats['std']
 
 def auc(y_true, y_pred):
-    auc = tf.metrics.auc(y_true, y_pred)[1]
+    auc = tf.compat.v1.metrics.auc(y_true, y_pred)[1]
     K.get_session().run(tf.local_variables_initializer())
     return auc
 
@@ -147,4 +147,6 @@ error = test_predictions - test_labels
 plt.hist(error, bins = 25)
 plt.xlabel("Prediction Error [MPG]")
 _ = plt.ylabel("Count")
+
 plt.show()
+

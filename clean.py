@@ -31,7 +31,6 @@ def clean_trips(data, train=True):
     #     if dest not in places:
     #         places[dest] = places_index
     #         places_index += 1
-
     #     froms.append(places[beg])
     #     dests.append(places[dest])
     
@@ -103,7 +102,6 @@ def clean_vessels(data):
     #         vessel_names[vessel] = vessel_index
     #         vessel_index += 1
     #     vessels.append(vessel_names[vessel])
-
     # data = data.drop(columns=['Vessel.Name'])
     # data.insert(1, 'Vessel', vessels)
     # return data
