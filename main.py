@@ -16,7 +16,7 @@ import clean
 
 print(tf.__version__)
 
-dataset = clean.load_data("Data/train.csv", 0).head(6000)
+dataset = clean.load_data("Data/train.csv", 0)
 dataset = clean.clean_trips(dataset)
 dataset = clean.clean_date_time(dataset)
 dataset = clean.clean_status(dataset)
@@ -24,8 +24,8 @@ dataset = clean.clean_vessels(dataset)
 print(dataset.shape)
 #dataset = clean.clean_traffic_data(dataset)
 dataset = dataset.dropna()
-#for col in dataset.columns:
-#    dataset[col] = dataset[col].astype(int)
+for col in dataset.columns:
+    dataset[col] = dataset[col].astype(int)
 print(dataset)
 
 
@@ -62,10 +62,10 @@ def build_model():
   model = keras.Sequential([
     layers.Dense(64, activation='relu', input_shape=[len(train_dataset.keys())]),
     layers.Dense(64, activation='relu'),
-    layers.Dense(1)
+    layers.Dense(1, activation='sigmoid')
   ])
 
-  optimizer = tf.keras.optimizers.RMSprop(0.001)
+  optimizer = tf.keras.optimizers.RMSprop(0.0005)
   #optimizer = tf.keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False)
 
   model.compile(loss='binary_crossentropy',
@@ -73,14 +73,7 @@ def build_model():
                 metrics=[auc])
   return model
 
-
-# Display training progress by printing a single dot for each completed epoch
-class PrintDot(keras.callbacks.Callback):
-  def on_epoch_end(self, epoch, logs):
-    if epoch % 100 == 0: print('')
-    print('.', end='')
-
-EPOCHS = 1000
+EPOCHS = 15
 
 def plot_history(history):
   hist = pd.DataFrame(history.history)
@@ -119,7 +112,7 @@ print(example_result)
 early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10)
 
 history = model.fit(normed_train_data, train_labels, epochs=EPOCHS,
-                    validation_split = 0.2, verbose=0, callbacks=[early_stop, PrintDot()])
+                    validation_split = 0.2, verbose=1)
 
 #plot_history(history)
 
@@ -139,4 +132,4 @@ error = test_predictions - test_labels
 plt.hist(error, bins = 25)
 plt.xlabel("Prediction Error [MPG]")
 _ = plt.ylabel("Count")
-#plt.show()
+plt.show()
