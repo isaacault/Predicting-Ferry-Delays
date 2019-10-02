@@ -10,12 +10,17 @@ import tensorflow as tf
 
 from tensorflow import keras
 from tensorflow.keras import layers
+import keras.backend as K
 
 import clean
 
 print(tf.__version__)
 
-dataset = clean.load_data("Data/traffic.csv", 0).head(600000)
+dataset = clean.load_data("Data/train.csv", 0).head(6000)
+dataset = clean.clean_trips(dataset)
+dataset = clean.clean_date_time(dataset)
+dataset = clean.clean_status(dataset)
+dataset = clean.clean_vessels(dataset)
 print(dataset.shape)
 #dataset = clean.clean_traffic_data(dataset)
 dataset = dataset.dropna()
@@ -27,24 +32,26 @@ print(dataset)
 train_dataset = dataset.sample(frac=0.8,random_state=0)
 test_dataset = dataset.drop(train_dataset.index)
 
-#sns.pairplot(train_dataset[["Traffic.Ordinal", "timestamp"]], diag_kind="kde")
+#sns.pairplot(train_dataset[["Delay.Indicator", "timestamp"]], diag_kind="kde")
 
 train_stats = train_dataset.describe()
-train_stats.pop("Traffic.Ordinal")
+train_stats.pop("Delay.Indicator")
 train_stats = train_stats.transpose()
 print(train_stats)
 
-train_labels = train_dataset.pop('Traffic.Ordinal')
-test_labels = test_dataset.pop('Traffic.Ordinal')
+train_labels = train_dataset.pop('Delay.Indicator')
+test_labels = test_dataset.pop('Delay.Indicator')
 print(train_stats['mean'])
 print(train_stats['std'])
-train_stats['std']['Year'] = 1
-train_stats['std']['Month'] = 1
-train_stats['std']['Day'] = 1
 print(type(train_stats))
 
 def norm(x):
   return (x - train_stats['mean']) / train_stats['std']
+
+def auc(y_true, y_pred):
+    auc = tf.metrics.auc(y_true, y_pred)[1]
+    K.get_session().run(tf.local_variables_initializer())
+    return auc
 
 normed_train_data = norm(train_dataset)
 normed_test_data = norm(test_dataset)
@@ -61,9 +68,9 @@ def build_model():
   optimizer = tf.keras.optimizers.RMSprop(0.001)
   #optimizer = tf.keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False)
 
-  model.compile(loss='mse',
+  model.compile(loss='binary_crossentropy',
                 optimizer=optimizer,
-                metrics=['accuracy'])
+                metrics=[auc])
   return model
 
 
@@ -81,7 +88,7 @@ def plot_history(history):
 
   plt.figure()
   plt.xlabel('Epoch')
-  plt.ylabel('Mean Abs Error [Traffic.Ordinal]')
+  plt.ylabel('Mean Abs Error [Delay.Indicator]')
   plt.plot(hist['epoch'], hist['mean_absolute_error'],
            label='Train Error')
   plt.plot(hist['epoch'], hist['val_mean_absolute_error'],
@@ -91,7 +98,7 @@ def plot_history(history):
 
   plt.figure()
   plt.xlabel('Epoch')
-  plt.ylabel('Mean Square Error [$Traffic.Ordinal^2$]')
+  plt.ylabel('Mean Square Error [$Delay.Indicator^2$]')
   plt.plot(hist['epoch'], hist['mean_squared_error'],
            label='Train Error')
   plt.plot(hist['epoch'], hist['val_mean_squared_error'],
@@ -119,8 +126,8 @@ history = model.fit(normed_train_data, train_labels, epochs=EPOCHS,
 test_predictions = model.predict(normed_test_data).flatten()
 print(test_predictions)
 plt.scatter(test_labels, test_predictions)
-plt.xlabel('True Values [Traffic.Ordinal]')
-plt.ylabel('Predictions [Traffic.Ordinal]')
+plt.xlabel('True Values [Delay.Indicator]')
+plt.ylabel('Predictions [Delay.Indicator]')
 plt.axis('equal')
 plt.axis('square')
 plt.xlim([0,plt.xlim()[1]])
