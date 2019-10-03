@@ -1,5 +1,4 @@
 # Predicting-Ferry-Delays
----
 This is the repository used for collaboration on the solution for the CANSSI National Case Study Competition 2019. More info can be found at http://www.canssi.ca/news-events/canssi-datathon-2019/
 
 The idea for this project is to take the various inputs surrounding a ferry trip and output a value in [0,1] representing the probability of the ferry being delayed. The scoring is done using Area Under the Curve (AUC) Receiver Operating Characteristics (ROC). This means that the further away from the true value you are, the worse you score. This neural network was created using Tensorflow with the following details:
