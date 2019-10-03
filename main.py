@@ -11,23 +11,25 @@ import keras.backend as K
 import load_data
 from collections import OrderedDict
 from sklearn import metrics
+import numpy as np
 
-EPOCHS = 5
+EPOCHS = 100
 TEST_LOCAL = False
 
+
 def auc(y_true, y_pred):
-    auc = tf.metrics.auc(y_true, y_pred)[1]
+    auc = tf.compat.v1.metrics.auc(y_true, y_pred)[1]
     K.get_session().run(tf.local_variables_initializer())
     return auc
 
 def build_model():
   model = keras.Sequential([
-    layers.Dense(64, activation='relu', input_shape=[len(train_data.keys())]),
-    layers.Dense(32, activation='relu'),
+    layers.Dense(30, activation='relu', input_shape=[len(train_data.keys())]),
+    layers.Dense(15, activation='relu'),
     layers.Dense(1, activation='sigmoid')
   ])
 
-  optimizer = tf.keras.optimizers.RMSprop(0.0001)
+  optimizer = tf.keras.optimizers.RMSprop(0.0005)
 
   model.compile(loss='binary_crossentropy',
                 optimizer=optimizer,
@@ -42,7 +44,7 @@ train_data, test_data = load_data.get_data()
 train_data = train_data.sample(frac=1)
 if TEST_LOCAL:
   dataset = train_data.copy()
-  train_data = dataset.sample(frac=0.8)
+  train_data = dataset.sample(frac=1)
   test_data = dataset.drop(train_data.index)
   test_labels = test_data.pop('Delay.Indicator')
 train_labels = train_data.pop('Delay.Indicator')
@@ -65,6 +67,7 @@ history = model.fit(
   epochs=EPOCHS, validation_split=validation, verbose=1)
 
 test_predictions = model.predict(normed_test_data).flatten()
+test_predictions = test_predictions.round(0)
 
 if TEST_LOCAL:
   fpr, tpr, thresholds = metrics.roc_curve(test_labels, test_predictions, pos_label=1)
@@ -80,4 +83,10 @@ if not TEST_LOCAL:
       }
     )
   )
+  convert_dict = {
+    'ID' : int,
+    'Delay.Indicator' : int
+  }
+  submission_data.astype(convert_dict)
+  submission_data.round(0)
   submission_data.to_csv('submission.csv', index=False)
